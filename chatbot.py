@@ -4,7 +4,7 @@ import os
 
 # -------- LLM --------
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model="gemma2-9b-it",  # "it" = instruction tuned
     temperature=0.0,
 )
 

@@ -20,8 +20,8 @@ embedding = HuggingFaceEmbeddings(
 
 # -------- LLM --------
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0
+    model="gemma2-9b-it",
+    temperature=0.0,
 )
 
 # -------- VECTOR DB PATH --------
