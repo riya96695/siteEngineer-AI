@@ -13,38 +13,36 @@ load_dotenv()
 
 working_dir = os.path.dirname(os.path.abspath(__file__))
 
-# -------- EMBEDDINGS --------
 embedding = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
-# -------- LLM --------
 llm = ChatGroq(
-    model="gemma2-9b-it",
+    model="openai/gpt-oss-20b",
     temperature=0.0,
 )
 
-# -------- VECTOR DB PATH --------
 VECTOR_DB_DIR = os.path.join(working_dir, "../doc_vectorstore")
 
-# -------- TEXT SPLITTER --------
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=2000,
     chunk_overlap=200
 )
 
-# =========================================================
-# ✅ SINGLETON VECTOR DB (IMPORTANT OPTIMIZATION)
-# =========================================================
-vectordb = Chroma(
-    persist_directory=VECTOR_DB_DIR,
-    embedding_function=embedding
-)
+_vectordb_cache = {}
 
-# =========================================================
-# ✅ GENERIC STORAGE FUNCTION
-# =========================================================
-def store_document(text, metadata=None):
+
+def get_vectordb(collection_name="global"):
+    if collection_name not in _vectordb_cache:
+        _vectordb_cache[collection_name] = Chroma(
+            persist_directory=VECTOR_DB_DIR,
+            embedding_function=embedding,
+            collection_name=collection_name
+        )
+    return _vectordb_cache[collection_name]
+
+
+def store_document(text, metadata=None, collection_name="global"):
 
     if metadata is None:
         metadata = {}
@@ -53,13 +51,11 @@ def store_document(text, metadata=None):
 
     texts = text_splitter.split_documents([doc])
 
+    vectordb = get_vectordb(collection_name)
     vectordb.add_documents(texts)
 
 
-# =========================================================
-# ✅ PDF PROCESSING
-# =========================================================
-def process_documents_to_chroma_db(file_paths):
+def process_documents_to_chroma_db(file_paths, collection_name="global"):
 
     for file_path in file_paths:
         loader = PyPDFLoader(file_path)
@@ -71,18 +67,20 @@ def process_documents_to_chroma_db(file_paths):
                 metadata={
                     "source": os.path.basename(file_path),
                     "type": "pdf"
-                }
+                },
+                collection_name=collection_name
             )
 
 
-# =========================================================
-# ✅ QUESTION ANSWERING (IMPROVED RETRIEVAL)
-# =========================================================
-def answer_question(user_question):
+def answer_question(user_question, collection_name="global"):
+
+    vectordb = get_vectordb(collection_name)
 
     retriever = vectordb.as_retriever(
-        search_kwargs={"k": 4}   # slightly better context
+        search_kwargs={"k": 4}
     )
+
+    source_docs = retriever.invoke(user_question)
 
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
@@ -92,4 +90,26 @@ def answer_question(user_question):
 
     response = qa_chain.invoke({"query": user_question})
 
-    return response["result"]
+    citations = []
+    seen = set()
+
+    for doc in source_docs:
+        source_name = doc.metadata.get("source", "Unknown")
+        page_num = doc.metadata.get("page")
+
+        if page_num is not None:
+            citation = f"{source_name}, Page {page_num + 1}"
+        else:
+            citation = source_name
+
+        if citation not in seen:
+            citations.append(citation)
+            seen.add(citation)
+
+    answer_text = response["result"]
+
+    if citations:
+        citation_text = "\n\n**Sources:** " + " | ".join(citations)
+        answer_text += citation_text
+
+    return answer_text

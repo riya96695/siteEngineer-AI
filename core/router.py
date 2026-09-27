@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq
 import os
 
 llm = ChatGroq(
-    model="gemma2-9b-it",
+    model="openai/gpt-oss-20b",
     temperature=0.0,
 )
 
