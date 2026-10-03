@@ -13,10 +13,6 @@ load_dotenv()
 
 working_dir = os.path.dirname(os.path.abspath(__file__))
 
-embedding = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
-
 llm = ChatGroq(
     model="openai/gpt-oss-20b",
     temperature=0.0,
@@ -29,6 +25,18 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=200
 )
 
+_embedding = None
+
+
+def get_embedding():
+    global _embedding
+    if _embedding is None:
+        _embedding = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        )
+    return _embedding
+
+
 _vectordb_cache = {}
 
 
@@ -36,7 +44,7 @@ def get_vectordb(collection_name="global"):
     if collection_name not in _vectordb_cache:
         _vectordb_cache[collection_name] = Chroma(
             persist_directory=VECTOR_DB_DIR,
-            embedding_function=embedding,
+            embedding_function=get_embedding(),
             collection_name=collection_name
         )
     return _vectordb_cache[collection_name]
