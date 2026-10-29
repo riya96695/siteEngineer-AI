@@ -52,6 +52,7 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173"
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -145,6 +146,7 @@ async def chat_stream(request: ChatRequest):
 async def chat_multimodal(
     message: str = Form(...),
     chat_history: str = Form("[]"),
+    project_id: str = Form(None),
     file: UploadFile = File(...)
 ):
     try:
@@ -173,7 +175,8 @@ async def chat_multimodal(
         ])
 
         image_description = vision_response.text
-        logger.info(f"[multimodal] file={file.filename} query='{message[:80]}'")
+        collection = f"project_{project_id}" if project_id else "global"
+        logger.info(f"[multimodal] file={file.filename} query='{message[:80]}' collection={collection}")
 
         combined_query = (
             f"[User ne ek image bheji hai. Image ka description: {image_description}]\n\n"
@@ -181,7 +184,7 @@ async def chat_multimodal(
         )
 
         history = json.loads(chat_history)
-        response = run_agent(combined_query, history)
+        response = run_agent(combined_query, history, collection_name=collection)
 
         return {
             "response": response,
