@@ -1,5 +1,7 @@
 import { BookOpen, Download } from 'lucide-react'
 
+const API_URL = 'https://siteengineer-ai.onrender.com'
+
 const isCodes = [
   {
     name: "IS 456 — 2000",
@@ -75,7 +77,7 @@ export default function ISCodeLibrary() {
             </p>
 
             <button
-              onClick={() => window.open(`http://localhost:8000/api/is-codes/${code.file}`, '_blank')}
+              onClick={() => window.open(`${API_URL}/api/is-codes/${code.file}`, '_blank')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
