@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
-import Chat from './components/Chat'
+import Chat from './components/chat'
 import Sidebar from './components/Sidebar'
 import ISCodeLibrary from './components/ISCodeLibrary'
 import Calculator from './components/Calculator'
