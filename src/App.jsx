@@ -12,16 +12,14 @@ import './App.css'
 function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [currentConvId, setCurrentConvId] = useState(null)
 
   useEffect(() => {
-    // User already logged in hai check karo
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoading(false)
     })
 
-    // Auth changes listen karo
-    // Jab login/logout hoga tab automatically update hoga
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null)
@@ -31,7 +29,6 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Loading state
   if (loading) return (
     <div style={{
       height: '100vh',
@@ -47,16 +44,14 @@ function App() {
     </div>
   )
 
-  // User logged in nahi → Auth page
   if (!user) return <Auth />
 
-  // User logged in → Full app
   return (
     <BrowserRouter>
       <div style={{ display: 'flex', height: '100vh' }}>
         <Sidebar user={user} />
         <Routes>
-          <Route path="/" element={<Chat user={user} />} />
+          <Route path="/" element={<Chat user={user} currentConvId={currentConvId} setCurrentConvId={setCurrentConvId} />} />
           <Route path="/library" element={<ISCodeLibrary />} />
           <Route path="/calculator" element={<Calculator />} />
           <Route path="/projects" element={<ProjectSpace user={user} />} />
