@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
+from typing import Optional
 import os
 import io
 import json
@@ -66,7 +67,7 @@ os.makedirs("uploaded_docs", exist_ok=True)
 class ChatRequest(BaseModel):
     message: str
     chat_history: list = []
-    project_id: str = None
+    project_id: Optional[str] = None
 
 
 @app.get("/")
