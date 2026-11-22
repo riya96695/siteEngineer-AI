@@ -1,3 +1,33 @@
+:root, [data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #141414;
+  --bg-tertiary: #242424;
+  --bg-hover: #2e2e2e;
+  --accent: #ff7a20;
+  --accent-light: #ff7a2020;
+  --accent-border: #ff7a2050;
+  --border-color: #2a2a2a;
+  --border-color-light: #333;
+  --text-primary: #e0e0e0;
+  --text-secondary: #aaa;
+  --text-muted: #666;
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #ececec;
+  --bg-hover: #e2e2e2;
+  --accent: #e8650a;
+  --accent-light: #e8650a18;
+  --accent-border: #e8650a50;
+  --border-color: #e0e0e0;
+  --border-color-light: #d0d0d0;
+  --text-primary: #1a1a1a;
+  --text-secondary: #555;
+  --text-muted: #888;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,6 +36,34 @@
 
 body {
   font-family: 'Segoe UI', sans-serif;
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Sidebar: chat ke "..." menu button hover pe dikhe */
+div:hover > .conv-menu-btn {
+  opacity: 1 !important;
+}
+
+/* Chat me markdown ki styling */
+.markdown-body p { margin: 0 0 8px; }
+.markdown-body p:last-child { margin-bottom: 0; }
+.markdown-body ul, .markdown-body ol { margin: 6px 0 6px 20px; }
+.markdown-body code {
+  background: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.markdown-body pre {
+  background: var(--bg-primary);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.markdown-body table { border-collapse: collapse; margin: 8px 0; }
+.markdown-body th, .markdown-body td {
+  border: 1px solid var(--border-color-light);
+  padding: 6px 10px;
 }
